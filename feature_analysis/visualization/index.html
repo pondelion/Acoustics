@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>Feature Visualization</title> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.7.0/js-yaml.min.js"></script>
+  <script type="text/javascript" src="./js/feature_api.js"></script>
+</head>
+<body>
+  <canvas id="chart"></canvas>
+  <script>
+    var ctx = document.getElementById("chart");
+    var chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        // labels: ['1', '2', '3', '4', '5', '6', '7'],
+        // datasets: [
+        //   {
+        //     label: 'data1',
+        //     data: [35, 34, 37, 35, 34, 35, 34, 25],
+        //     borderColor: "rgba(255,0,0,1)",
+        //     backgroundColor: "rgba(0,0,0,0)"
+        //   },
+        //   {
+        //     label: 'data2',
+        //     data: [25, 27, 27, 25, 26, 27, 25, 21],
+        //     borderColor: "rgba(0,0,255,1)",
+        //     backgroundColor: "rgba(0,0,0,0)"
+        //   }
+        // ],
+        datasets: []
+      },
+      options: {}
+    });
+
+    var mfccFeatNames;
+    var esc50Tags;
+    var esc50Wavfiles;
+    var mfccFeats = {}
+
+    getMfccFeatNames(
+      callback=(data) => {
+        mfccFeatNames = data['mfcc_feat_names']
+        console.log(mfccFeatNames[0])
+      }
+    )
+    getEsc50Tags(
+      callback=(data) => { esc50Tags = data }
+    )
+    getEsc50Tags(
+      callback=(data) => { console.log(data) },
+      tag='sheep'
+    )
+    getEsc50Wavfiles(
+      callback=(data) => {
+        esc50Wavfiles = data['esc_50_wavfiles']
+        console.log(esc50Wavfiles[0])
+        esc50Wavfiles.forEach(filepath => {
+          getMfccFeat(
+            callback=(data) => { 
+              mfccFeats[filepath] = data['mfcc_feat']
+              chart.data.datasets.push({
+                data: data['mfcc_feat'][0]
+              })
+              chart.update()
+            },
+            filepath=esc50Wavfiles[0]
+          )
+        });
+      }
+    )
+
+  </script>
+</body>
+</html>
