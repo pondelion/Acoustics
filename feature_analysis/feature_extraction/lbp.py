@@ -57,3 +57,27 @@ def get_lbps_weights(
     lbps = stacked_bins.sum(axis=0)
 
     return lbps, weights
+
+
+def to_onehot(
+    lbps: np.ndarray,
+    max_val: int=2**8
+):
+    """Convert LBP value to max_val dimentional one hot vector
+    (lbps.shape[0], lbs.shape[1]) => (lbps.shape[0], lbs.shape[1], max_val)
+
+    Args:
+        lbps (np.ndarray): 2 dimentional Local Binary Pattern dataframe.
+
+    Returns:
+        LBP one hot verices (np.ndarray): (lbps.shape[0], lbs.shape[1], max_val)
+    """
+    return np.eye(max_val)[lbps]
+
+
+def weighted_sum_lbp_onehot(
+    lbps_onehot: np.array,
+    weights: np.array
+):
+    weighted_lbps_onehot = np.array([weights * lbps_onehot[:, :, i] for i in range(lbps_onehot.shape[2])])
+    return weighted_lbps_onehot.sum(axis=(1, 2))
