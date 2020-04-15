@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import requests
 
@@ -8,7 +9,7 @@ class AzureSpeakerIdentificationAPIHelper:
     def __init__(
         self,
         api_key: str,
-        endpoint: str
+        endpoint
     ):
         self._API_KEY = api_key
         self._ENDPOINT = endpoint
@@ -121,3 +122,63 @@ class AzureSpeakerIdentificationAPIHelper:
             raise e
 
         return res
+
+    def speaker_identification(
+        self,
+        profile_ids: List[str],
+        wav_path: str
+    ):
+        """[summary]
+
+        Args:
+            profile_ids (List[str]): [description]
+            wav_path (str): [description]
+
+        Raises:
+            e: [description]
+            Exception: [description]
+
+        Returns:
+            [type]: [description]
+        """
+        url = f'{self._ENDPOINT}/spid/v1.0/identify?identificationProfileIds={profile_ids}&shortAudio=true'
+        headers = {
+            'Content-Type': 'application/octet-stream',
+            'Ocp-Apim-Subscription-Key': self._API_KEY,
+        }
+
+        data = open(wav_path, 'rb').read()
+
+        try:
+            res = requests.post(url, data=data, headers=headers)
+        except Exception as e:
+            raise e
+
+        if res.status_code != 202:
+            raise Exception(f'Invalid response : {res.content}')
+
+        return res.headers
+
+    def get_operation_status(self, op_url: str):
+        """[summary]
+
+        Args:
+            op_url (str): [description]
+
+        Raises:
+            e: [description]
+
+        Returns:
+            [type]: [description]
+        """
+        headers = {
+            'Content-Type': 'application/json',
+            'Ocp-Apim-Subscription-Key': self._API_KEY,
+        }
+
+        try:
+            res = requests.get(op_url, headers=headers)
+        except Exception as e:
+            raise e
+
+        return res.content
